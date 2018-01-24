@@ -3,6 +3,9 @@ import {
   View,
   Text,
   StyleSheet,
+  Animated,
+  Easing,
+  Dimensions
 } from 'react-native';
 
 import ajax from '../ajax';
@@ -11,22 +14,41 @@ import DealDetail from './DealDetail';
 import SearchBar from './SearchBar';
 
 export default class App extends Component {
+  titleXPos = new Animated.Value(0);
   state = {
     deals: [],
     dealsFromSearch: [],
     currentDealId:null
   };
+
+  animateTitle = (direction = 1) => {
+    console.log('ANIMATE');
+    const width = Dimensions.get('window').width - 150;
+    Animated.timing(
+      this.titleXPos,
+      {
+        toValue: direction * width/4,
+        duration:1000,
+        easing: Easing.ease,
+      }
+    ).start(({ finished }) => {
+      if (finished) {
+        this.animateTitle(-1*direction);
+      }
+    });
+  };
   async componentDidMount() {
-      const deals = await ajax.fetchInitialDeals();
-      this.setState({ deals });
+    this.animateTitle();
+    const deals = await ajax.fetchInitialDeals();
+    this.setState({ deals });
   }
 
   searchDeals = async (searchTerm) => {
-      let dealsFromSeach = [];
+      let dealsFromSearch = [];
       if (searchTerm) {
         dealsFromSearch = await ajax.fetchDealsSearchResults(searchTerm);
       }
-      this.setState({dealsFromSeach});
+      this.setState({dealsFromSearch});
   };
 
   setCurrentDeal = (dealId) => {
@@ -37,7 +59,8 @@ export default class App extends Component {
 
   unsetCurrentDeal = () => {
     this.setState({
-      currentDealId: null
+      currentDealId: null,
+      dealsFromSearch:[],
     });
   };
 
@@ -58,18 +81,20 @@ export default class App extends Component {
         </View>
       );
     }
-    if (this.state.deals.length > 0) {
+    const dealsToDisplay = this.state.dealsFromSearch.length > 0 ? this.state.dealsFromSearch : this.state.deals;
+    if (dealsToDisplay.length > 0) {
       return (
         <View style={styles.main}>
           <SearchBar searchDeals={this.searchDeals} />
-          <DealList deals={this.state.deals} onItemPress={this.setCurrentDeal}/>
+          <DealList deals={dealsToDisplay
+          } onItemPress={this.setCurrentDeal}/>
         </View>
       );
     }
     return (
-      <View style={styles.container}>
+      <Animated.View style={[{left:this.titleXPos},styles.container]}>
         <Text>BakeSale</Text>
-      </View>
+      </Animated.View>
     );
   }
 }

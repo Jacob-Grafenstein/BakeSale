@@ -7,19 +7,31 @@ import {
   Text,
   StyleSheet,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  PanResponder,
+  Animated
 } from 'react-native';
 
 import { priceDisplay } from '../util';
 import ajax from '../ajax';
 
 export default class DealDetail extends Component {
+  imagePanResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderMove: (evt, gs) => {
+      console.log('MOVING', gs.dx);
+    },
+    onPanResponderRelease: (evt,gs) => {
+      console.log('RELEASED');
+    }
+  });
   static propTypes = {
     initialDealData: PropTypes.object.isRequired,
     onBack: PropTypes.func.isRequired,
   };
   state = {
     deal: this.props.initialDealData,
+    imageIndex:0,
   };
   async componentDidMount() {
     const fullDeal = await ajax.fetchDealDetail(this.state.deal.key);
@@ -36,7 +48,8 @@ export default class DealDetail extends Component {
           <Text style={styles.backButton}>{backKey}</Text>
         </TouchableOpacity>
         <Image
-          source={{uri: deal.media[0]}}
+          {...this.imagePanResponder.panHandlers}
+          source={{uri: deal.media[this.state.imageIndex]}}
           style={styles.image}
         />
         <View style={styles.information}>
