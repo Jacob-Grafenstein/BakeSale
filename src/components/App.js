@@ -86,8 +86,10 @@ export default class App extends Component {
       return (
         <View style={styles.main}>
           <SearchBar searchDeals={this.searchDeals} />
-          <DealList deals={dealsToDisplay
-          } onItemPress={this.setCurrentDeal}/>
+          <DealList
+            deals={dealsToDisplay}
+            onItemPress={this.setCurrentDeal}
+          />
         </View>
       );
     }
