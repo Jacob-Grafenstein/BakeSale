@@ -11,7 +11,9 @@ import {
   PanResponder,
   Animated,
   ScrollView,
-  Dimensions
+  Dimensions,
+  Linking,
+  Button
 } from 'react-native';
 
 import { priceDisplay } from '../util';
@@ -109,6 +111,11 @@ export default class DealDetail extends Component {
       deal: fullDeal,
     });
   }
+
+  openDealURL = () => {
+    Linking.openURL(this.state.deal.url);
+  }
+
   render() {
     const { deal } = this.state;
     const backKey = "< Back";
@@ -143,6 +150,7 @@ export default class DealDetail extends Component {
               <Text>{deal.description}</Text>
             </View>
           </View>
+          <Button title="Buy this deal!" onPress={this.openDealURL} />
         </View>
       </ScrollView>
     );
